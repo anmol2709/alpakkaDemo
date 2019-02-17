@@ -1,3 +1,5 @@
+package elasticSearchAlpakka
+
 import akka.actor.ActorSystem
 import akka.kafka.scaladsl.Consumer
 import akka.kafka.{ConsumerSettings, Subscriptions}
@@ -10,13 +12,12 @@ import org.apache.kafka.clients.consumer.{ConsumerConfig, ConsumerRecord}
 import org.apache.kafka.common.serialization.{ByteArrayDeserializer, StringDeserializer}
 import org.elasticsearch.client.RestClient
 import play.api.libs.json.Json
+import spray.json.DefaultJsonProtocol.jsonFormat2
 import spray.json.DefaultJsonProtocol._
-import spray.json._
-
-case class Company(location: String, name: String)
+import spray.json.JsonFormat
 
 object KafkaToEs extends App {
-  implicit val system = ActorSystem.create("akka-stream-kafka-getting-started")
+  implicit val system = ActorSystem.create()
 
   implicit val mat = ActorMaterializer()
   implicit val _ = Json.format[Company]
@@ -46,11 +47,11 @@ object KafkaToEs extends App {
     .withProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest")
 
   val kafkaSource: Source[ConsumerRecord[Array[Byte], String], Consumer.Control] =
-    Consumer.plainSource(consumerSettings, Subscriptions.topics("kafkaTopic"))
+    Consumer.plainSource(consumerSettings, Subscriptions.topics("topic221"))
 
 
   val esSink = ElasticsearchSink.create[Company](
-    indexName = "essink",
+    indexName = "sink1",
     typeName = "company"
   )
 
